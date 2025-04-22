@@ -1,4 +1,4 @@
-# Off Axis Projection with Face Tracking
+# Off Axis Projection with Face Tracking in Unity
 
 ## Face Tracking:
 https://github.com/homuler/MediaPipeUnityPlugin?tab=readme-ov-file
