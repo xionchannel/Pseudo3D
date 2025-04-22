@@ -1,0 +1,29 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mediapipe.Tests.EditMode", "Mediapipe.Tests.EditMode.csproj", "{09170306-8452-2ae7-663c-5712bdff6367}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mediapipe.Runtime", "Mediapipe.Runtime.csproj", "{966fab8d-2a2e-84de-134c-2129bf5b8195}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mediapipe.Unity.Sample", "Mediapipe.Unity.Sample.csproj", "{754ea85b-1718-9a80-470b-c88148791862}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Assembly-CSharp", "Assembly-CSharp.csproj", "{bd7a970b-812f-76cb-c273-34eb86c5e1e9}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{09170306-8452-2ae7-663c-5712bdff6367}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{09170306-8452-2ae7-663c-5712bdff6367}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{966fab8d-2a2e-84de-134c-2129bf5b8195}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{966fab8d-2a2e-84de-134c-2129bf5b8195}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{754ea85b-1718-9a80-470b-c88148791862}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{754ea85b-1718-9a80-470b-c88148791862}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{bd7a970b-812f-76cb-c273-34eb86c5e1e9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{bd7a970b-812f-76cb-c273-34eb86c5e1e9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
