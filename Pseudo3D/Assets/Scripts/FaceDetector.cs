@@ -173,7 +173,7 @@ namespace Mediapipe.Unity.Sample.FaceLandmarkDetection
       //return;
       CameraTransform.localPosition = new Vector3(
         16.0f/3.0f * _currentPosition.x,
-        9.0f/3.0f * _currentPosition.y,
+        9.0f/3.0f * _currentPosition.y * -1f,
         -3.13f /*0f * pos.z*/);
     }
   }

@@ -47,7 +47,10 @@ namespace Apt.Unity.Projection
 
             if (DrawGizmos)
             {
-                var pos = transform.position;
+                var localPos = transform.localPosition;
+                localPos.z = GetCurrentEyeZ();
+                var pos = transform.localToWorldMatrix.MultiplyPoint(localPos);
+
                 Gizmos.color = Color.green;
                 Gizmos.DrawLine(pos, pos + va);
                 Gizmos.DrawLine(pos, pos + vb);
@@ -63,6 +66,13 @@ namespace Apt.Unity.Projection
             }
         }
 
+        //カメラの画角からEyeZ値を算出
+        private float GetCurrentEyeZ()
+        {
+            float halfW = (ProjectionScreen.TopLeft -  ProjectionScreen.BottomLeft).magnitude * 0.5f;
+            float eyeZ = Mathf.Tan(Mathf.Deg2Rad * (90f - cam.fieldOfView * 0.5f)) * halfW * -1f;
+            return eyeZ;
+        }
 
         private void LateUpdate()
         {
@@ -79,7 +89,20 @@ namespace Apt.Unity.Projection
 
                 Matrix4x4 M = ProjectionScreen.M;
 
-                eyePos = transform.position;
+                var localPos = transform.localPosition;
+                localPos.z = GetCurrentEyeZ();
+                eyePos = transform.localToWorldMatrix.MultiplyPoint(localPos);
+                
+                // カメラの画角からEyeZを更新
+                //eyePos.z = GetCurrentEyeZ();
+
+                /*{
+                    //現在の画角を算出
+                    float w = (ProjectionScreen.TopLeft -  ProjectionScreen.BottomLeft).magnitude;
+                    float z = Mathf.Abs(eyePos.z);
+                    float fov = (90f - (Mathf.Atan2(z, 0.5f * w) * Mathf.Rad2Deg)) * 2f;
+                    Debug.Log("FOV: " + fov);
+                }*/
 
                 //From eye to projection screen corners
                 va = pa - eyePos;
