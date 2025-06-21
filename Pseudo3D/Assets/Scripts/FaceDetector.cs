@@ -5,7 +5,7 @@
 // https://opensource.org/licenses/MIT.
 
 using System.Collections;
-using System.Linq;
+using Apt.Unity.Projection;
 using Mediapipe.Tasks.Vision.FaceLandmarker;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -14,14 +14,14 @@ namespace Mediapipe.Unity.Sample.FaceLandmarkDetection
 {
   public class FaceLandmarkerRunner : VisionTaskApiRunner<FaceLandmarker>
   {
-    [SerializeField] private FaceLandmarkerResultAnnotationController _faceLandmarkerResultAnnotationController;
-
     private Experimental.TextureFramePool _textureFramePool;
 
     public readonly FaceLandmarkDetectionConfig config = new FaceLandmarkDetectionConfig();
 
-    public Transform CameraTransform;
+    public Transform cameraTransform;
+    public ProjectionPlane projectionPlane;
     private Vector3 _currentPosition;
+    private Camera _camera;
 
     public override void Stop()
     {
@@ -44,7 +44,9 @@ namespace Mediapipe.Unity.Sample.FaceLandmarkDetection
 
       yield return AssetLoader.PrepareAssetAsync(config.ModelPath);
 
-      var options = config.GetFaceLandmarkerOptions(config.RunningMode == Tasks.Vision.Core.RunningMode.LIVE_STREAM ? OnFaceLandmarkDetectionOutput : null);
+      var options = config.GetFaceLandmarkerOptions(config.RunningMode == Tasks.Vision.Core.RunningMode.LIVE_STREAM
+        ? OnFaceLandmarkDetectionOutput
+        : null);
       taskApi = FaceLandmarker.CreateFromOptions(options, GpuManager.GpuResources);
       var imageSource = ImageSourceProvider.ImageSource;
 
@@ -58,17 +60,14 @@ namespace Mediapipe.Unity.Sample.FaceLandmarkDetection
 
       // Use RGBA32 as the input format.
       // TODO: When using GpuBuffer, MediaPipe assumes that the input format is BGRA, so maybe the following code needs to be fixed.
-      _textureFramePool = new Experimental.TextureFramePool(imageSource.textureWidth, imageSource.textureHeight, TextureFormat.RGBA32, 10);
-
-      // NOTE: The screen will be resized later, keeping the aspect ratio.
-      //screen.Initialize(imageSource);
-
-      //SetupAnnotationController(_faceLandmarkerResultAnnotationController, imageSource);
+      _textureFramePool = new Experimental.TextureFramePool(imageSource.textureWidth, imageSource.textureHeight,
+        TextureFormat.RGBA32, 10);
 
       var transformationOptions = imageSource.GetTransformationOptions();
       var flipHorizontally = transformationOptions.flipHorizontally;
       var flipVertically = transformationOptions.flipVertically;
-      var imageProcessingOptions = new Tasks.Vision.Core.ImageProcessingOptions(rotationDegrees: (int)transformationOptions.rotationAngle);
+      var imageProcessingOptions =
+        new Tasks.Vision.Core.ImageProcessingOptions(rotationDegrees: (int)transformationOptions.rotationAngle);
 
       AsyncGPUReadbackRequest req = default;
       var waitUntilReqDone = new WaitUntil(() => req.done);
@@ -76,7 +75,8 @@ namespace Mediapipe.Unity.Sample.FaceLandmarkDetection
       var result = FaceLandmarkerResult.Alloc(options.numFaces);
 
       // NOTE: we can share the GL context of the render thread with MediaPipe (for now, only on Android)
-      var canUseGpuImage = SystemInfo.graphicsDeviceType == GraphicsDeviceType.OpenGLES3 && GpuManager.GpuResources != null;
+      var canUseGpuImage = SystemInfo.graphicsDeviceType == GraphicsDeviceType.OpenGLES3 &&
+                           GpuManager.GpuResources != null;
       using var glContext = canUseGpuImage ? GpuManager.GetGlContext() : null;
 
       while (true)
@@ -101,6 +101,7 @@ namespace Mediapipe.Unity.Sample.FaceLandmarkDetection
             {
               throw new System.Exception("ImageReadMode.GPU is not supported");
             }
+
             textureFrame.ReadTextureOnGPU(imageSource.GetCurrentTexture(), flipHorizontally, flipVertically);
             image = textureFrame.BuildGPUImage(glContext);
             // TODO: Currently we wait here for one frame to make sure the texture is fully copied to the TextureFrame before sending it to MediaPipe.
@@ -123,6 +124,7 @@ namespace Mediapipe.Unity.Sample.FaceLandmarkDetection
               Debug.LogWarning($"Failed to read texture from the image source");
               continue;
             }
+
             image = textureFrame.BuildCPUImage();
             textureFrame.Release();
             break;
@@ -131,24 +133,8 @@ namespace Mediapipe.Unity.Sample.FaceLandmarkDetection
         switch (taskApi.runningMode)
         {
           case Tasks.Vision.Core.RunningMode.IMAGE:
-            if (taskApi.TryDetect(image, imageProcessingOptions, ref result))
-            {
-              //_faceLandmarkerResultAnnotationController.DrawNow(result);
-            }
-            else
-            {
-              //_faceLandmarkerResultAnnotationController.DrawNow(default);
-            }
             break;
           case Tasks.Vision.Core.RunningMode.VIDEO:
-            if (taskApi.TryDetectForVideo(image, GetCurrentTimestampMillisec(), imageProcessingOptions, ref result))
-            {
-              //_faceLandmarkerResultAnnotationController.DrawNow(result);
-            }
-            else
-            {
-              //_faceLandmarkerResultAnnotationController.DrawNow(default);
-            }
             break;
           case Tasks.Vision.Core.RunningMode.LIVE_STREAM:
             taskApi.DetectAsync(image, GetCurrentTimestampMillisec(), imageProcessingOptions);
@@ -159,7 +145,6 @@ namespace Mediapipe.Unity.Sample.FaceLandmarkDetection
 
     private void OnFaceLandmarkDetectionOutput(FaceLandmarkerResult result, Image image, long timestamp)
     {
-      //_faceLandmarkerResultAnnotationController.DrawLater(result);
       if (result.faceLandmarks == null) return;
       if (result.faceLandmarks[0].landmarks == null) return;
       _currentPosition = new Vector3(
@@ -168,13 +153,27 @@ namespace Mediapipe.Unity.Sample.FaceLandmarkDetection
         result.faceLandmarks[0].landmarks[1].z * 0);
     }
 
+    //カメラの画角からEyeZ値を算出
+    private float GetCurrentEyeZ()
+    {
+      if (_camera == null)
+      {
+        _camera = cameraTransform.GetComponent<Camera>();
+      }
+
+      float halfW = (projectionPlane.TopLeft - projectionPlane.BottomLeft).magnitude * 0.5f;
+      float eyeZ = Mathf.Tan(Mathf.Deg2Rad * (90f - _camera.fieldOfView * 0.5f)) * halfW * -1f;
+      return eyeZ;
+    }
+
     public void Update()
     {
-      //return;
-      CameraTransform.localPosition = new Vector3(
-        16.0f/3.0f * _currentPosition.x,
-        9.0f/3.0f * _currentPosition.y * -1f,
-        -3.13f /*0f * pos.z*/);
+      float width = (projectionPlane.TopLeft - projectionPlane.TopRight).magnitude;
+      float height = (projectionPlane.BottomLeft - projectionPlane.TopLeft).magnitude;
+      cameraTransform.localPosition = new Vector3(
+        width * 0.5f * _currentPosition.x,
+        height * 0.5f * _currentPosition.y * -1f,
+        GetCurrentEyeZ());
     }
   }
 }

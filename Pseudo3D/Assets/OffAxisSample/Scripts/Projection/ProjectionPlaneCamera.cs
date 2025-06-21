@@ -1,6 +1,5 @@
 ﻿//NOTE: Undefine this if you need to move the plane at runtime
 //#define PRECALC_PLANE
-using System.Collections;
 using UnityEngine;
 
 namespace Apt.Unity.Projection
@@ -47,9 +46,7 @@ namespace Apt.Unity.Projection
 
             if (DrawGizmos)
             {
-                var localPos = transform.localPosition;
-                localPos.z = GetCurrentEyeZ();
-                var pos = transform.localToWorldMatrix.MultiplyPoint(localPos);
+                var pos = transform.position;
 
                 Gizmos.color = Color.green;
                 Gizmos.DrawLine(pos, pos + va);
@@ -65,15 +62,7 @@ namespace Apt.Unity.Projection
                 Gizmos.DrawLine(pos, viewDir);
             }
         }
-
-        //カメラの画角からEyeZ値を算出
-        private float GetCurrentEyeZ()
-        {
-            float halfW = (ProjectionScreen.TopLeft -  ProjectionScreen.BottomLeft).magnitude * 0.5f;
-            float eyeZ = Mathf.Tan(Mathf.Deg2Rad * (90f - cam.fieldOfView * 0.5f)) * halfW * -1f;
-            return eyeZ;
-        }
-
+        
         private void LateUpdate()
         {
             if(ProjectionScreen != null)
@@ -89,21 +78,8 @@ namespace Apt.Unity.Projection
 
                 Matrix4x4 M = ProjectionScreen.M;
 
-                var localPos = transform.localPosition;
-                localPos.z = GetCurrentEyeZ();
-                eyePos = transform.localToWorldMatrix.MultiplyPoint(localPos);
+                eyePos = transform.localPosition;
                 
-                // カメラの画角からEyeZを更新
-                //eyePos.z = GetCurrentEyeZ();
-
-                /*{
-                    //現在の画角を算出
-                    float w = (ProjectionScreen.TopLeft -  ProjectionScreen.BottomLeft).magnitude;
-                    float z = Mathf.Abs(eyePos.z);
-                    float fov = (90f - (Mathf.Atan2(z, 0.5f * w) * Mathf.Rad2Deg)) * 2f;
-                    Debug.Log("FOV: " + fov);
-                }*/
-
                 //From eye to projection screen corners
                 va = pa - eyePos;
                 vb = pb - eyePos;
