@@ -78,7 +78,7 @@ namespace Apt.Unity.Projection
 
                 Matrix4x4 M = ProjectionScreen.M;
 
-                eyePos = transform.localPosition;
+                eyePos = transform.position;
                 
                 //From eye to projection screen corners
                 va = pa - eyePos;
