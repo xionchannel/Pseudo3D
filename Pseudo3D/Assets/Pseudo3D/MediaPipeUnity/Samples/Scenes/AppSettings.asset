@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: AppSettings
   m_EditorClassIdentifier: 
   _defaultImageSource: 0
-  _preferableInferenceMode: 0
+  _preferableInferenceMode: 1
   _assetLoaderType: 0
   _logLevel: 5
   _glogMinloglevel: 0

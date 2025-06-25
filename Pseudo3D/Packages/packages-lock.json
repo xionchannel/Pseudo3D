@@ -1,9 +1,9 @@
 {
   "dependencies": {
     "com.github.homuler.mediapipe": {
-      "version": "file:com.github.homuler.mediapipe",
+      "version": "file:/Users/xionchannel/Pseudo3D/com.github.homuler.mediapipe-0.16.1.tgz",
       "depth": 0,
-      "source": "embedded",
+      "source": "local-tarball",
       "dependencies": {
         "com.unity.ugui": "1.0.0",
         "com.unity.test-framework": "1.0.0"
