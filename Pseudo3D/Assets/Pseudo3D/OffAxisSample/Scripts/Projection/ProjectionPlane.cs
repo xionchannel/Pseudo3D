@@ -81,6 +81,8 @@ namespace Apt.Unity.Projection
                 bottomTrans = bottom.transform;
 
             }
+
+            AspectRatio = new Vector2(Screen.width, Screen.height);
         }
 
         private GameObject CreateAlignmentQuad()

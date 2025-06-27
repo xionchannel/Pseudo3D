@@ -50,6 +50,10 @@ namespace Mediapipe.Unity.Sample.FaceLandmarkDetection
         : null);
       taskApi = FaceLandmarker.CreateFromOptions(options, GpuManager.GpuResources);
       var imageSource = ImageSourceProvider.ImageSource;
+      #if PLATFORM_IOS && !UNITY_EDITOR
+      // iOS実機では全面カメラ(id=1)にする
+      imageSource.SelectSource(1);
+      #endif
 
       yield return imageSource.Play();
 
